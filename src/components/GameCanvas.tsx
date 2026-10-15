@@ -127,9 +127,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
       {/* Barra Superior do Canvas */}
       <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/90 via-black/40 to-transparent flex items-center justify-between z-10 opacity-90 hover:opacity-100 transition-opacity duration-300">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+          <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
           <span className="text-xs font-bold text-neutral-200 uppercase tracking-widest">
-            {gameState.source === 'online' ? 'PlayStation 2 Live Engine' : 'Arquivo Local'}
+            {gameState.source === 'online' ? 'PlayStation 2 Engine' : 'Arquivo Local'}
           </span>
           <span className="text-xs text-emerald-400 font-mono">| {fps > 0 ? fps : 60}.0 FPS</span>
         </div>
