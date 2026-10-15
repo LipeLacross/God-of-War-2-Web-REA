@@ -9,9 +9,11 @@ import { useGamepad } from './hooks/useGamepad';
 import { fetchFastBootRom, isRomCached, clearRomCache } from './services/romDownloader';
 import type { GameState } from './types/game';
 
-// URL direta real da ISO do God of War II no Internet Archive (com suporte a CORS e HTTP Range Requests)
+// Endpoint local /api/stream da própria Vercel (com CORS 100% liberado e Range Requests para o Archive)
 const DEFAULT_ARCHIVE_ROM_URL =
-  'https://archive.org/download/20250504_20250504_0850/SCUS_974.81.God%20of%20War%20II.iso';
+  typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+    ? '/api/stream'
+    : 'https://archive.org/download/20250504_20250504_0850/SCUS_974.81.God%20of%20War%20II.iso';
 
 export function App() {
   const { gamepad, vibrate } = useGamepad();
