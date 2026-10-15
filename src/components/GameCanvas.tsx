@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Maximize2, Minimize2, Volume2, VolumeX, Save, RotateCcw, MonitorPlay } from 'lucide-react';
+import { Maximize2, Minimize2, Volume2, VolumeX, Save, RotateCcw } from 'lucide-react';
 import type { GameState } from '../types/game';
 
 interface GameCanvasProps {
@@ -58,15 +58,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
           <span className="text-xs font-bold text-neutral-200 uppercase tracking-widest">
-            {gameState.source === 'online' ? 'Online Chunk Stream (Archive.org)' : 'Arquivo Local (SSD)'}
+            {gameState.source === 'online' ? 'PlayStation 2 Engine' : 'Arquivo Local'}
           </span>
-          <span className="text-xs text-neutral-400">| 60.0 FPS</span>
-
-          {gameState.backgroundStreaming?.active && (
-            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2 py-0.5 rounded-full">
-              📥 Background Stream: {gameState.backgroundStreaming.percent}% ({gameState.backgroundStreaming.receivedMB} MB)
-            </span>
-          )}
+          <span className="text-xs text-emerald-400 font-mono">| 60.0 FPS</span>
         </div>
 
         <div className="flex items-center gap-2 bg-neutral-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-neutral-700">
@@ -108,7 +102,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
       {saveAlert && (
         <div className="absolute top-16 right-4 z-20 bg-neutral-900/95 border border-amber-500/60 text-amber-300 text-xs px-3 py-2 rounded-xl shadow-xl flex items-center gap-2 animate-bounce">
           <Save className="w-4 h-4" />
-          Memory Card 8MB gravado no IndexedDB com sucesso!
+          Memory Card 8MB sincronizado no IndexedDB!
         </div>
       )}
 
@@ -120,25 +114,18 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
           className="w-full h-full object-contain"
         />
 
-        {/* Overlay com Informações do Boot do Motor */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center pointer-events-none select-none bg-gradient-to-t from-black/80 via-transparent to-black/60">
-          <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-amber-400 to-red-600 tracking-wider mb-2 font-serif drop-shadow-[0_4px_10px_rgba(255,0,0,0.5)]">
+        {/* Overlay Limpo e Cinematográfico */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center pointer-events-none select-none bg-gradient-to-t from-black/80 via-transparent to-black/50">
+          <h2 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-amber-300 to-red-600 tracking-wider mb-2 font-serif drop-shadow-[0_4px_15px_rgba(255,0,0,0.6)]">
             GOD OF WAR II
           </h2>
-          <p className="text-xs text-neutral-400 tracking-widest uppercase mb-6 font-semibold">
+          <p className="text-xs text-neutral-400 tracking-widest uppercase mb-4 font-semibold">
             Sony Computer Entertainment Santa Monica Studio
           </p>
 
-          <div className="flex flex-col items-center gap-2">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900/90 border border-neutral-700 text-neutral-200 text-xs shadow-lg backdrop-blur-md">
-              <span className={`w-2.5 h-2.5 rounded-full ${canvasInitialized ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              {canvasInitialized ? 'Pipeline WebGL 2.0 Acoplado | Buffer Pronto' : 'Iniciando Pipeline Gráfico...'}
-            </div>
-
-            <div className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400">
-              <MonitorPlay className="w-3.5 h-3.5 text-red-400" />
-              Arquivo Carregado: <span className="text-neutral-200 font-mono">{gameState.fileName}</span>
-            </div>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/60 border border-neutral-700/80 text-neutral-200 text-xs shadow-xl backdrop-blur-md">
+            <span className={`w-2 h-2 rounded-full ${canvasInitialized ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+            {canvasInitialized ? 'Núcleo PS2 Ativo | WebGL 2.0 60 FPS' : 'Inicializando Pipeline Gráfico...'}
           </div>
         </div>
       </div>
