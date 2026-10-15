@@ -58,9 +58,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
           <span className="text-xs font-bold text-neutral-200 uppercase tracking-widest">
-            {gameState.source === 'online' ? 'Online Stream (Archive.org)' : 'Arquivo Local (SSD)'}
+            {gameState.source === 'online' ? 'Online Chunk Stream (Archive.org)' : 'Arquivo Local (SSD)'}
           </span>
           <span className="text-xs text-neutral-400">| 60.0 FPS</span>
+
+          {gameState.backgroundStreaming?.active && (
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2 py-0.5 rounded-full">
+              📥 Background Stream: {gameState.backgroundStreaming.percent}% ({gameState.backgroundStreaming.receivedMB} MB)
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2 bg-neutral-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-neutral-700">

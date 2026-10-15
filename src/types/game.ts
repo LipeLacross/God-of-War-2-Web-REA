@@ -7,6 +7,12 @@ export interface GameState {
   fileName: string | null;
   fileSizeMB: number | null;
   cachedInBrowser: boolean;
+  backgroundStreaming?: {
+    percent: number;
+    receivedMB: number;
+    totalMB: number;
+    active: boolean;
+  };
 }
 
 export interface GamepadStatus {

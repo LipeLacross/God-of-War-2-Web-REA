@@ -1,5 +1,5 @@
 import React from 'react';
-import { DownloadCloud, Play, CheckCircle2, Trash2 } from 'lucide-react';
+import { Play, CheckCircle2, Trash2, Zap } from 'lucide-react';
 
 interface DownloadCardProps {
   progress: number;
@@ -24,7 +24,7 @@ export const DownloadCard: React.FC<DownloadCardProps> = ({
 
       <div className="flex items-center justify-between mb-4">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
-          ⚡ MODO RECOMENDADO (SEM ISO)
+          🌊 MODO 2: CHUNK STREAMING (RANGE REQUESTS 206)
         </span>
 
         {isCached && (
@@ -35,30 +35,33 @@ export const DownloadCard: React.FC<DownloadCardProps> = ({
       </div>
 
       <h3 className="text-xl font-bold text-neutral-100 mb-2 flex items-center gap-2">
-        🏛️ Jogar Direto do Internet Archive
+        ⚡ Boot Instantâneo (Primeiros 150 MB) + Streaming Contínuo
       </h3>
       <p className="text-sm text-neutral-400 mb-6 leading-relaxed">
-        O jogo é baixado diretamente do Internet Archive (CORS liberado) e armazenado no cache local do seu navegador via CacheStorage. Você baixa uma vez e nunca mais gasta internet!
+        Não precisa esperar os 3.48 GB! O motor baixa apenas os <strong>primeiros 150 MB</strong> (setor de boot e fase 1 do Colosso de Rodes) e dá boot em cerca de <strong>10 segundos</strong>. Conforme você joga, o restante é baixado em segundo plano!
       </p>
 
       {isDownloading ? (
         <div className="space-y-3">
           <div className="flex justify-between text-xs font-medium text-neutral-300">
             <span>{statusText}</span>
-            <span className="text-red-400 font-bold">{progress}%</span>
+            <span className="text-amber-400 font-bold">{progress}%</span>
           </div>
           <div className="w-full bg-neutral-950 rounded-full h-3 p-0.5 border border-red-900/50 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-red-600 via-amber-600 to-red-500 h-full rounded-full transition-all duration-300 shadow-[0_0_15px_rgba(239,68,68,0.5)]"
+              className="bg-gradient-to-r from-red-600 via-amber-500 to-emerald-400 h-full rounded-full transition-all duration-300 shadow-[0_0_15px_rgba(245,158,11,0.5)]"
               style={{ width: `${progress}%` }}
             />
           </div>
+          <p className="text-[11px] text-neutral-400 italic">
+            🚀 HTTP 206 Partial Content: O jogo iniciará assim que o bloco inicial for validado!
+          </p>
         </div>
       ) : (
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={onStartOnline}
-            className="flex-1 py-3.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 active:scale-95 shadow-lg shadow-red-950/50 border border-red-500/50 flex items-center justify-center gap-2 transition cursor-pointer"
+            className="flex-1 py-3.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-red-600 via-red-700 to-amber-700 hover:from-red-500 hover:to-amber-600 active:scale-95 shadow-lg shadow-red-950/50 border border-red-500/50 flex items-center justify-center gap-2 transition cursor-pointer"
           >
             {isCached ? (
               <>
@@ -67,8 +70,8 @@ export const DownloadCard: React.FC<DownloadCardProps> = ({
               </>
             ) : (
               <>
-                <DownloadCloud className="w-5 h-5" />
-                JOGAR AGORA (STREAMING ARCHIVE)
+                <Zap className="w-5 h-5 text-amber-300 fill-amber-300" />
+                JOGAR COM CHUNK STREAMING (BOOT EM 10s)
               </>
             )}
           </button>
