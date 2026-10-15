@@ -28,8 +28,6 @@ export class DiscImageDevice {
   private module: PlayModule;
   private doneFlag: boolean = false;
   private file: Blob | File | null = null;
-  private sectorCache: Map<number, Uint8Array> = new Map();
-  private readonly MAX_CACHE_SECTORS = 256;
 
   constructor(module: PlayModule) {
     this.module = module;
@@ -37,7 +35,6 @@ export class DiscImageDevice {
 
   setFile(file: Blob | File) {
     this.file = file;
-    this.sectorCache.clear();
   }
 
   getFileSize(): number {
@@ -53,29 +50,12 @@ export class DiscImageDevice {
     if (!this.file) throw new Error('No PS2 ISO file set.');
     this.doneFlag = false;
 
-    // Cache hit: setores já fatiados retornam em 0ms sem I/O
-    const cacheKey = fileOffset * 31 + length;
-    const cached = this.sectorCache.get(cacheKey);
-    if (cached) {
-      this.module.HEAPU8.set(cached, heapOffset);
-      this.doneFlag = true;
-      return;
-    }
-
-    // Leitura assíncrona com slice
+    // Stream the sliced range directly into Emscripten HEAPU8 memory
     this.file
       .slice(fileOffset, fileOffset + length)
       .arrayBuffer()
       .then(buffer => {
-        const data = new Uint8Array(buffer);
-        this.module.HEAPU8.set(data, heapOffset);
-
-        // Armazena no cache LRU para evitar re-leitura de setores de áudio e loop de menus
-        if (this.sectorCache.size >= this.MAX_CACHE_SECTORS) {
-          const firstKey = this.sectorCache.keys().next().value;
-          if (firstKey !== undefined) this.sectorCache.delete(firstKey);
-        }
-        this.sectorCache.set(cacheKey, data);
+        this.module.HEAPU8.set(new Uint8Array(buffer), heapOffset);
         this.doneFlag = true;
       })
       .catch(err => {
