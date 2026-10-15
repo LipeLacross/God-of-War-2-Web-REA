@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Maximize2, Minimize2, Volume2, VolumeX, Save, RotateCcw } from 'lucide-react';
+import { Maximize2, Minimize2, Volume2, VolumeX, Save, RotateCcw, AlertTriangle } from 'lucide-react';
 import type { GameState } from '../types/game';
+import { initPlayEmulator } from '../services/playEmulator';
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -14,22 +15,61 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
   const [isMuted, setIsMuted] = useState(false);
   const [saveAlert, setSaveAlert] = useState(false);
   const [fps, setFps] = useState(60);
+  const [bootError, setBootError] = useState<string | null>(null);
+  const [isBooting, setIsBooting] = useState(true);
 
-  // Animação dinâmica do Canvas para o jogo
+  // Inicializa o motor Play! Web (PS2 WebAssembly)
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    let isCancelled = false;
 
-    canvas.width = 640;
-    canvas.height = 448;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const startEmulator = async () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
+      setIsBooting(true);
+      setBootError(null);
+
+      try {
+        const romData = gameState.romBlob;
+        if (!romData) {
+          throw new Error('Arquivo de imagem ISO não foi carregado.');
+        }
+
+        await initPlayEmulator(
+          canvas,
+          romData,
+          gameState.fileName || 'SCUS_974.81.iso'
+        );
+
+        if (!isCancelled) {
+          setIsBooting(false);
+        }
+      } catch (err: any) {
+        console.error('Falha ao inicializar o Play! WebAssembly:', err);
+        if (!isCancelled) {
+          setBootError(
+            err.message || 'Falha ao iniciar emulador. Verifique se WebAssembly/WebGL2 está habilitado.'
+          );
+          setIsBooting(false);
+        }
+      }
+    };
+
+    startEmulator();
+
+    return () => {
+      isCancelled = true;
+      // Se necessário, pausa ou encerra o loop do módulo
+    };
+  }, [gameState.romBlob, gameState.fileName]);
+
+  // Monitor de FPS
+  useEffect(() => {
     let frame = 0;
-    let animId: number;
     let lastTime = performance.now();
+    let animId: number;
 
-    const render = (time: number) => {
+    const tick = (time: number) => {
       frame++;
       const delta = time - lastTime;
       if (delta >= 1000) {
@@ -37,73 +77,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
         frame = 0;
         lastTime = time;
       }
-
-      // Limpa fundo com gradiente escuro de batalha
-      const grad = ctx.createRadialGradient(320, 224, 50, 320, 224, 380);
-      grad.addColorStop(0, '#1f0000');
-      grad.addColorStop(0.5, '#0a0000');
-      grad.addColorStop(1, '#000000');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 640, 448);
-
-      // Efeito de partículas de fogo / cinzas espartanas subindo
-      ctx.fillStyle = 'rgba(255, 60, 0, 0.4)';
-      for (let i = 0; i < 20; i++) {
-        const x = (Math.sin(time * 0.001 + i * 2) * 200 + 320 + i * 15) % 640;
-        const y = (448 - ((time * 0.08 + i * 30) % 448));
-        const r = (i % 3) + 1.5;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Símbolo Ômega Dourado/Rubro central brilhando
-      const pulse = Math.sin(time * 0.003) * 0.15 + 0.85;
-      ctx.save();
-      ctx.translate(320, 200);
-      ctx.scale(pulse, pulse);
-
-      ctx.strokeStyle = '#ff2200';
-      ctx.lineWidth = 12;
-      ctx.shadowColor = '#ff0000';
-      ctx.shadowBlur = 30;
-
-      // Desenho do Ômega
-      ctx.beginPath();
-      ctx.arc(0, -10, 65, 0.25 * Math.PI, 0.75 * Math.PI, true);
-      ctx.lineTo(-45, 65);
-      ctx.lineTo(-75, 65);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(0, -10, 65, 0.25 * Math.PI, 0.75 * Math.PI, true);
-      ctx.lineTo(45, 65);
-      ctx.lineTo(75, 65);
-      ctx.stroke();
-
-      ctx.restore();
-
-      // Textos dinâmicos do motor
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 28px "Georgia", serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('GOD OF WAR II', 320, 315);
-
-      ctx.font = '12px "Segoe UI", sans-serif';
-      ctx.fillStyle = '#ff8888';
-      ctx.fillText('PLAYSTATION 2 EMULATION CORE ACTIVE', 320, 345);
-
-      ctx.fillStyle = '#888888';
-      ctx.font = '11px monospace';
-      ctx.fillText(`ROM MOUNTED: ${gameState.fileName || 'SCUS_974.81.iso'}`, 320, 375);
-
-      animId = requestAnimationFrame(render);
+      animId = requestAnimationFrame(tick);
     };
 
-    animId = requestAnimationFrame(render);
+    animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
-  }, [gameState.fileName]);
+  }, []);
 
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
@@ -177,17 +156,47 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
         </div>
       )}
 
-      {/* Canvas com a Renderização em Tempo Real */}
+      {/* Overlay de Boot ou Erro */}
+      {isBooting && !bootError && (
+        <div className="absolute inset-0 z-15 flex flex-col items-center justify-center bg-black/85 backdrop-blur-xs text-center space-y-3 pointer-events-none">
+          <div className="w-10 h-10 border-3 border-red-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-semibold tracking-wide text-neutral-200">
+            Dando boot na ISO do God of War II...
+          </p>
+          <span className="text-xs text-neutral-400 font-mono">
+            Carregando Play! WebAssembly Core
+          </span>
+        </div>
+      )}
+
+      {bootError && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-neutral-950/95 p-6 text-center space-y-4">
+          <AlertTriangle className="w-12 h-12 text-amber-500" />
+          <h3 className="text-lg font-bold text-red-400">Falha na Inicialização da Emulação</h3>
+          <p className="text-sm text-neutral-300 max-w-md">{bootError}</p>
+          <button
+            onClick={onReset}
+            className="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-xl text-sm font-semibold transition"
+          >
+            Voltar e Tentar Novamente
+          </button>
+        </div>
+      )}
+
+      {/* Canvas com a Renderização em Tempo Real (outputCanvas) */}
       <div className="relative w-full h-full flex items-center justify-center bg-black">
         <canvas
           ref={canvasRef}
-          id="game-canvas"
+          id="outputCanvas"
+          width={640}
+          height={480}
+          tabIndex={-1}
           className="w-full h-full object-contain"
         />
       </div>
 
       {/* Barra Inferior com Atalhos e Teclas */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/95 via-black/60 to-transparent flex items-center justify-between text-[11px] text-neutral-400">
+      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/95 via-black/60 to-transparent flex items-center justify-between text-[11px] text-neutral-400 z-10 pointer-events-none">
         <div className="flex items-center gap-3">
           <span>🎮 <b>Analógicos:</b> Mover / Esquiva</span>
           <span>⚔️ <b>Ataques:</b> Quadrado / Triângulo</span>

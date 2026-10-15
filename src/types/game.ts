@@ -13,6 +13,7 @@ export interface GameState {
     totalMB: number;
     active: boolean;
   };
+  romBlob?: Blob | File | null;
 }
 
 export interface GamepadStatus {

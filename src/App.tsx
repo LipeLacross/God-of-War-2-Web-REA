@@ -49,7 +49,8 @@ export function App() {
     }));
 
     try {
-      await fetchFastBootRom(
+      let bootBlobRef: Blob | null = null;
+      const bootPromise = fetchFastBootRom(
         DEFAULT_ARCHIVE_ROM_URL,
         (percent, receivedMB, targetBootMB, isReadyForBoot) => {
           setGameState(prev => ({
@@ -64,16 +65,6 @@ export function App() {
           if (isReadyForBoot) {
             confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
             vibrate(200, 0.8, 0.8);
-
-            setGameState(prev => ({
-              ...prev,
-              isDownloading: false,
-              isGameLoaded: true,
-              source: 'online',
-              fileName: 'God of War II (Chunk Stream).iso',
-              cachedInBrowser: true,
-            }));
-            setIsCached(true);
           }
         },
         // Callback do streaming em segundo plano (enquanto o jogador já está lutando)
@@ -89,6 +80,19 @@ export function App() {
           }));
         }
       );
+
+      bootBlobRef = await bootPromise;
+
+      setGameState(prev => ({
+        ...prev,
+        isDownloading: false,
+        isGameLoaded: true,
+        source: 'online',
+        fileName: 'God of War II (Chunk Stream).iso',
+        cachedInBrowser: true,
+        romBlob: bootBlobRef,
+      }));
+      setIsCached(true);
     } catch (err: any) {
       console.error(err);
       alert(`Erro no streaming via Archive: ${err.message || 'Falha na conexão'}.`);
@@ -111,6 +115,7 @@ export function App() {
       fileName: file.name,
       fileSizeMB: sizeMB,
       cachedInBrowser: false,
+      romBlob: file,
     });
   };
 
