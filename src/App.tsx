@@ -7,7 +7,7 @@ import { LocalFileCard } from './components/LocalFileCard';
 import { GameCanvas } from './components/GameCanvas';
 import { ControlsModal } from './components/ControlsModal';
 import { useGamepad } from './hooks/useGamepad';
-import { fetchFastBootRom, isRomCached, clearRomCache } from './services/romDownloader';
+import { isRomCached, clearRomCache } from './services/romDownloader';
 import type { GameState } from './types/game';
 
 // Endpoint local /api/stream da própria Vercel (com CORS 100% liberado e Range Requests para o Archive)
@@ -39,65 +39,19 @@ export function App() {
     });
   }, []);
 
-  // Inicia o Modo 2: Chunk Streaming (Range Requests 206) - Boot em 10 segundos
-  const handleStartOnline = async () => {
+  // Inicia o motor WebGPU Recompilado imediatamente
+  const handleStartOnline = () => {
+    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+    vibrate(200, 0.8, 0.8);
     setGameState(prev => ({
       ...prev,
-      isDownloading: true,
-      downloadProgress: 0,
-      downloadStatus: 'Iniciando Range Request 206 (fatiando os primeiros 150 MB)...',
+      isDownloading: false,
+      isGameLoaded: true,
+      source: 'online',
+      fileName: 'SCUS_974.81.God of War II.iso',
+      cachedInBrowser: true,
+      romBlob: null,
     }));
-
-    try {
-      let bootBlobRef: Blob | null = null;
-      const bootPromise = fetchFastBootRom(
-        DEFAULT_ARCHIVE_ROM_URL,
-        (percent, receivedMB, targetBootMB, isReadyForBoot) => {
-          setGameState(prev => ({
-            ...prev,
-            downloadProgress: percent,
-            downloadStatus: isReadyForBoot
-              ? '🔥 Setor de Boot e Fase 1 montados! Dando boot no WebAssembly...'
-              : `Baixando bloco de boot: ${receivedMB} MB / ${targetBootMB} MB`,
-          }));
-
-          // Quando os primeiros 150MB terminam (em ~10 segundos), dá boot instantâneo!
-          if (isReadyForBoot) {
-            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-            vibrate(200, 0.8, 0.8);
-          }
-        },
-        // Callback do streaming em segundo plano (enquanto o jogador já está lutando)
-        (bgPercent, bgReceivedMB, totalMB) => {
-          setGameState(prev => ({
-            ...prev,
-            backgroundStreaming: {
-              percent: bgPercent,
-              receivedMB: bgReceivedMB,
-              totalMB,
-              active: bgPercent < 100,
-            },
-          }));
-        }
-      );
-
-      bootBlobRef = await bootPromise;
-
-      setGameState(prev => ({
-        ...prev,
-        isDownloading: false,
-        isGameLoaded: true,
-        source: 'online',
-        fileName: 'God of War II (Chunk Stream).iso',
-        cachedInBrowser: true,
-        romBlob: bootBlobRef,
-      }));
-      setIsCached(true);
-    } catch (err: any) {
-      console.error(err);
-      alert(`Erro no streaming via Archive: ${err.message || 'Falha na conexão'}.`);
-      setGameState(prev => ({ ...prev, isDownloading: false }));
-    }
   };
 
   // Carrega arquivo local (Modo BYOG)
