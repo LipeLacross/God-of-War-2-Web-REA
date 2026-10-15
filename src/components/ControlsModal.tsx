@@ -107,19 +107,51 @@ export const ControlsModal: React.FC<ControlsModalProps> = ({ isOpen, onClose })
               </div>
             </div>
           ) : (
-            <div className="space-y-3 text-xs bg-neutral-950/70 p-4 rounded-xl border border-neutral-800">
-              <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px]">Mapeamento de Teclado Padrão</h4>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Movimento:</span> <span className="font-mono text-neutral-200 font-bold">W, A, S, D</span></div>
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Ataque Rápido:</span> <span className="font-mono text-neutral-200 font-bold">J</span></div>
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Ataque Forte:</span> <span className="font-mono text-neutral-200 font-bold">I</span></div>
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Agarrar (QTE):</span> <span className="font-mono text-neutral-200 font-bold">L</span></div>
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Pulo:</span> <span className="font-mono text-neutral-200 font-bold">Espaço / K</span></div>
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Bloqueio (L1):</span> <span className="font-mono text-neutral-200 font-bold">Q</span></div>
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Interagir (R1):</span> <span className="font-mono text-neutral-200 font-bold">E</span></div>
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Magia (L2):</span> <span className="font-mono text-neutral-200 font-bold">U</span></div>
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Save State:</span> <span className="font-mono text-amber-400 font-bold">F1</span></div>
-                <div className="flex justify-between py-1 border-b border-neutral-800"><span className="text-neutral-400">Load State:</span> <span className="font-mono text-amber-400 font-bold">F3</span></div>
+            <div className="space-y-4 text-xs bg-neutral-950/70 p-4 rounded-xl border border-neutral-800">
+              <h4 className="font-bold text-amber-400 uppercase tracking-wider text-[11px]">
+                Mapeamento Nativo Play! Web (Teclado)
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">Analógico Esquerdo (Andar):</span>
+                  <span className="font-mono text-amber-300 font-bold">T (Cima), G (Baixo), F (Esq), H (Dir)</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">D-Pad (Direcional):</span>
+                  <span className="font-mono text-neutral-200 font-bold">Setas do Teclado</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">Quadrado (Ataque Leve):</span>
+                  <span className="font-mono text-blue-400 font-bold">A</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">Triângulo (Ataque Pesado):</span>
+                  <span className="font-mono text-emerald-400 font-bold">S</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">Cruz / X (Pulo / Selecionar):</span>
+                  <span className="font-mono text-sky-400 font-bold">Z</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">Círculo (Agarrar / Ação QTE):</span>
+                  <span className="font-mono text-red-400 font-bold">X</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">Start / Pausar:</span>
+                  <span className="font-mono text-neutral-200 font-bold">Enter (Return)</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">Select:</span>
+                  <span className="font-mono text-neutral-200 font-bold">Backspace</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">L1 (Bloqueio) / L2 (Magia):</span>
+                  <span className="font-mono text-neutral-200 font-bold">1 / 2</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-neutral-800">
+                  <span className="text-neutral-400">R1 (Baús) / R2 (Fúria):</span>
+                  <span className="font-mono text-neutral-200 font-bold">8 / 9</span>
+                </div>
               </div>
             </div>
           )}

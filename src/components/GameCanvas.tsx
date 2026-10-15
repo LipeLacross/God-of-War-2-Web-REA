@@ -184,14 +184,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
       )}
 
       {/* Canvas com a Renderização em Tempo Real (outputCanvas) */}
-      <div className="relative w-full h-full flex items-center justify-center bg-black">
+      <div 
+        className="relative w-full h-full flex items-center justify-center bg-black cursor-pointer"
+        onClick={() => canvasRef.current?.focus()}
+      >
         <canvas
           ref={canvasRef}
           id="outputCanvas"
           width={640}
           height={480}
-          tabIndex={-1}
-          className="w-full h-full object-contain"
+          tabIndex={0}
+          className="w-full h-full object-contain outline-none focus:ring-1 focus:ring-red-500/40 [image-rendering:pixelated]"
         />
       </div>
 
