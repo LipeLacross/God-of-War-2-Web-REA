@@ -10,7 +10,7 @@ A high-performance web application built with **React 19, TypeScript, Vite, and 
 ## 🔨 Project Features
 
 - ⚡ **Dual Loading Modes:**
-  - **Direct Streaming (Internet Archive):** Background download and mounting of ROM chunks via HTTP Streams (CORS enabled) without requiring local files.
+  - **Chunk Streaming (Internet Archive - HTTP 206):** Downloads only the initial **150 MB** of the ISO (boot sector and Colossus of Rhodes stage 1) to achieve a **10-second fast boot**, while the remainder is silently streamed in the background without gameplay stutters.
   - **Local Mode (BYOG - Bring Your Own Game):** Instant loading of `.iso` or `.chd` files from the user's local SSD via HTML5 File System API without internet consumption.
 - 💾 **Dual Save Persistence:**
   - **Virtual Memory Card (8MB):** Saves made at golden light columns are intercepted and written to browser **IndexedDB**.

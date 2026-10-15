@@ -10,7 +10,7 @@ Aplicação web de alta performance construída em **React 19, TypeScript, Vite 
 ## 🔨 Funcionalidades do Projeto
 
 - ⚡ **Dois Modos de Carregamento:**
-  - **Streaming Direto (Internet Archive):** Download e montagem da ROM em segundo plano via HTTP Streams (CORS habilitado) sem precisar possuir o arquivo no computador.
+  - **Chunk Streaming (Internet Archive - HTTP 206):** Baixa apenas os primeiros **150 MB** da ISO (setor de boot e fase 1 do Colosso de Rodes) para dar **boot em cerca de 10 segundos**, enquanto o restante é transmitido silenciosamente em segundo plano sem travar o jogo.
   - **Modo Local (BYOG - Bring Your Own Game):** Carregamento de arquivos `.iso` ou `.chd` do disco local via HTML5 File System API sem gastar dados de internet.
 - 💾 **Persistência Dupla de Saves:**
   - **Memory Card Virtual (8MB):** Gravação dos saves nativos das colunas de luz dourada diretamente no **IndexedDB** do navegador.
