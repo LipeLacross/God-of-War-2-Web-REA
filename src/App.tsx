@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { Shield, Sparkles, Trophy } from 'lucide-react';
+import { Shield, Sparkles, Trophy, HelpCircle } from 'lucide-react';
 import { GamepadHUD } from './components/GamepadHUD';
 import { DownloadCard } from './components/DownloadCard';
 import { LocalFileCard } from './components/LocalFileCard';
 import { GameCanvas } from './components/GameCanvas';
+import { ControlsModal } from './components/ControlsModal';
 import { useGamepad } from './hooks/useGamepad';
 import { fetchFastBootRom, isRomCached, clearRomCache } from './services/romDownloader';
 import type { GameState } from './types/game';
@@ -17,6 +18,7 @@ const DEFAULT_ARCHIVE_ROM_URL =
 
 export function App() {
   const { gamepad, vibrate } = useGamepad();
+  const [isControlsOpen, setIsControlsOpen] = useState(false);
   const [gameState, setGameState] = useState<GameState>({
     isDownloading: false,
     downloadProgress: 0,
@@ -145,6 +147,12 @@ export function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsControlsOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-200 transition cursor-pointer"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-red-400" /> Controles
+            </button>
             <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" /> WebGL 2.0 / WebGPU
             </span>
@@ -154,6 +162,9 @@ export function App() {
           </div>
         </div>
       </header>
+
+      {/* Modal de Controles */}
+      <ControlsModal isOpen={isControlsOpen} onClose={() => setIsControlsOpen(false)} />
 
       {/* Conteúdo Central */}
       <main className="max-w-6xl mx-auto px-4 py-8 flex-1 w-full flex flex-col justify-center">
