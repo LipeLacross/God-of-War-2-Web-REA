@@ -3,7 +3,6 @@ import confetti from 'canvas-confetti';
 import { Shield, Sparkles, Trophy, HelpCircle } from 'lucide-react';
 import { GamepadHUD } from './components/GamepadHUD';
 import { DownloadCard } from './components/DownloadCard';
-import { LocalFileCard } from './components/LocalFileCard';
 import { GameCanvas } from './components/GameCanvas';
 import { ControlsModal } from './components/ControlsModal';
 import { useGamepad } from './hooks/useGamepad';
@@ -54,24 +53,6 @@ export function App() {
     }));
   };
 
-  // Carrega arquivo local (Modo BYOG)
-  const handleFileSelect = (file: File) => {
-    const sizeMB = Number((file.size / (1024 * 1024)).toFixed(1));
-    vibrate(150, 0.6, 0.6);
-    confetti({ particleCount: 50, spread: 60 });
-
-    setGameState({
-      isDownloading: false,
-      downloadProgress: 100,
-      downloadStatus: 'Pronto',
-      isGameLoaded: true,
-      source: 'local',
-      fileName: file.name,
-      fileSizeMB: sizeMB,
-      cachedInBrowser: false,
-      romBlob: file,
-    });
-  };
 
   const handleClearCache = async () => {
     if (confirm('Deseja excluir a ROM salva no cache do navegador para liberar memória?')) {
@@ -144,22 +125,16 @@ export function App() {
               </p>
             </div>
 
-            {/* Grid dos Modos de Jogo */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
-                <DownloadCard
-                  progress={gameState.downloadProgress}
-                  isDownloading={gameState.isDownloading}
-                  statusText={gameState.downloadStatus}
-                  isCached={isCached}
-                  onStartOnline={handleStartOnline}
-                  onClearCache={handleClearCache}
-                />
-              </div>
-
-              <div>
-                <LocalFileCard onFileSelect={handleFileSelect} />
-              </div>
+            {/* Modo de Jogo Otimizado */}
+            <div className="max-w-2xl mx-auto w-full">
+              <DownloadCard
+                progress={gameState.downloadProgress}
+                isDownloading={gameState.isDownloading}
+                statusText={gameState.downloadStatus}
+                isCached={isCached}
+                onStartOnline={handleStartOnline}
+                onClearCache={handleClearCache}
+              />
             </div>
 
             {/* Status do Controle */}

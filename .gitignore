@@ -27,5 +27,6 @@ dist-ssr
 *.iso
 *.bin
 *.chd
-*.cso
+# Local compiler workspace
+ps2-web-recomp/
 

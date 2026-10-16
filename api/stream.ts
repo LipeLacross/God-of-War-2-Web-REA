@@ -9,6 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Range, Content-Type, Accept');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Content-Length, Accept-Ranges');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -25,8 +26,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const archiveRes = await fetch(ARCHIVE_DIRECT_URL, {
-      method: req.method,
+      method: req.method === 'HEAD' ? 'HEAD' : 'GET',
       headers: fetchHeaders,
+      redirect: 'follow',
     });
 
     res.status(archiveRes.status);
@@ -40,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    if (!archiveRes.body) {
+    if (req.method === 'HEAD' || !archiveRes.body) {
       return res.end();
     }
 
