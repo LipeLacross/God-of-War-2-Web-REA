@@ -9,9 +9,8 @@ A high-performance web application built with **React 19, TypeScript, Vite, and 
 
 ## 🔨 Project Features
 
-- ⚡ **Dual Loading Modes:**
-  - **Chunk Streaming (Internet Archive - HTTP 206):** Downloads only the initial **150 MB** of the ISO (boot sector and Colossus of Rhodes stage 1) to achieve a **10-second fast boot**, while the remainder is silently streamed in the background without gameplay stutters.
-  - **Local Mode (BYOG - Bring Your Own Game):** Instant loading of `.iso` or `.chd` files from the user's local SSD via HTML5 File System API without internet consumption.
+- ⚡ **Optimized Execution & Chunk Streaming:**
+  - **Direct Chunk Streaming (HTTP 206):** On-demand ISO sector streaming without freezing, enabling fast boot and smooth gameplay directly in the browser via WebAssembly and WebGPU.
 - 💾 **Dual Save Persistence:**
   - **Virtual Memory Card (8MB):** Saves made at golden light columns are intercepted and written to browser **IndexedDB**.
   - **Permanent Offline Cache:** Downloaded ROM data is stored in the browser's **CacheStorage API**, ensuring 1-second instant boot from the second visit onwards.
@@ -26,7 +25,7 @@ A high-performance web application built with **React 19, TypeScript, Vite, and 
 ### 📸 Visual Project Example
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lipelacross/assets/main/gow2-web-preview.png" alt="God of War 2 Web Interface" width="85%" style="margin: 16px 0; border-radius: 12px; box-shadow: 0 0 25px rgba(255,0,0,0.3);">
+  <img src="public/gow2-web-preview.png" alt="God of War 2 Web Interface" width="85%" style="margin: 16px 0; border-radius: 12px; box-shadow: 0 0 25px rgba(255,0,0,0.3);">
 </div>
 
 ---

@@ -9,9 +9,8 @@ Aplicação web de alta performance construída em **React 19, TypeScript, Vite 
 
 ## 🔨 Funcionalidades do Projeto
 
-- ⚡ **Dois Modos de Carregamento:**
-  - **Chunk Streaming (Internet Archive - HTTP 206):** Baixa apenas os primeiros **150 MB** da ISO (setor de boot e fase 1 do Colosso de Rodes) para dar **boot em cerca de 10 segundos**, enquanto o restante é transmitido silenciosamente em segundo plano sem travar o jogo.
-  - **Modo Local (BYOG - Bring Your Own Game):** Carregamento de arquivos `.iso` ou `.chd` do disco local via HTML5 File System API sem gastar dados de internet.
+- ⚡ **Execução Otimizada & Chunk Streaming:**
+  - **Chunk Streaming Direto (HTTP 206):** Transmissão sob demanda de setores da ISO sem travar o jogo, garantindo boot rápido e execução fluida diretamente no navegador via WebAssembly e WebGPU.
 - 💾 **Persistência Dupla de Saves:**
   - **Memory Card Virtual (8MB):** Gravação dos saves nativos das colunas de luz dourada diretamente no **IndexedDB** do navegador.
   - **Cache Offline Permanente:** O jogo baixado é armazenado via **CacheStorage API**, garantindo carregamento instantâneo a partir da segunda visita.
@@ -26,7 +25,7 @@ Aplicação web de alta performance construída em **React 19, TypeScript, Vite 
 ### 📸 Exemplo Visual do Projeto
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lipelacross/assets/main/gow2-web-preview.png" alt="God of War 2 Web Interface" width="85%" style="margin: 16px 0; border-radius: 12px; box-shadow: 0 0 25px rgba(255,0,0,0.3);">
+  <img src="public/gow2-web-preview.png" alt="God of War 2 Web Interface" width="85%" style="margin: 16px 0; border-radius: 12px; box-shadow: 0 0 25px rgba(255,0,0,0.3);">
 </div>
 
 ---
