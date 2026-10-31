@@ -1,7 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const ARCHIVE_DIRECT_URL =
-  'https://dn720703.ca.archive.org/0/items/20250504_20250504_0850/SCUS_974.81.God%20of%20War%20II.iso';
+const ARCHIVE_MIRRORS = [
+  'https://ia600708.us.archive.org/14/items/20250504_20250504_0850/SCUS_974.81.God%20of%20War%20II.iso',
+  'https://ia800708.us.archive.org/14/items/20250504_20250504_0850/SCUS_974.81.God%20of%20War%20II.iso',
+  'https://archive.org/download/20250504_20250504_0850/SCUS_974.81.God%20of%20War%20II.iso',
+  'https://dn720703.ca.archive.org/0/items/20250504_20250504_0850/SCUS_974.81.God%20of%20War%20II.iso',
+];
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS Headers abertos para qualquer domínio ou subdomínio
@@ -25,11 +29,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       fetchHeaders['Range'] = rangeHeader;
     }
 
-    const archiveRes = await fetch(ARCHIVE_DIRECT_URL, {
-      method: req.method === 'HEAD' ? 'HEAD' : 'GET',
-      headers: fetchHeaders,
-      redirect: 'follow',
-    });
+    let archiveRes: Response | null = null;
+    for (const mirrorUrl of ARCHIVE_MIRRORS) {
+      try {
+        const response = await fetch(mirrorUrl, {
+          method: req.method === 'HEAD' ? 'HEAD' : 'GET',
+          headers: fetchHeaders,
+          redirect: 'follow',
+        });
+        if (response.ok || response.status === 206 || response.status === 304) {
+          archiveRes = response;
+          break;
+        }
+      } catch (err) {
+        // tenta o próximo mirror
+      }
+    }
+
+    if (!archiveRes) {
+      return res.status(502).json({ error: 'Nenhum espelho do Archive respondeu com sucesso.' });
+    }
 
     res.status(archiveRes.status);
 
