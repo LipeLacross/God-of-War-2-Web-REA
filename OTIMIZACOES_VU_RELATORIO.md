@@ -1,0 +1,84 @@
+# 📜 Relatório de Diagnóstico e Otimizações – God of War II Web (REA / WebGPU)
+
+> **Data:** 31 de Outubro de 2026  
+> **Repositório:** `LipeLacross/God-of-War-2-Web-REA`  
+> **Objetivo:** Investigar e solucionar o gargalo de **VU 100%**, quedas de taxa de quadros (~20 FPS) e viabilizar performance estável no navegador via WebAssembly e WebGPU.
+
+---
+
+## 🎯 1. Visão Geral do Problema
+
+Durante a execução de *God of War II* no navegador, a telemetria apresentava:
+```text
+⚡ 20–21 FPS (GS 21Hz) | GPU 28–31% | CPU 21–26% · VU 100% · GS 37% | Heap 1024 MB | Audio 0 ms
+```
+- **Sintoma:** VU (Vector Unit 1 do PS2) travado permanentemente em **100%**.
+- **Impacto:** O processador vetorial é responsável por transformações 3D, cálculos de vértices, matrizes de ossos e clipping de geometria. Com a VU saturada, o jogo ficava limitado a 20 FPS, mesmo com a GPU e a CPU principal com folga.
+
+---
+
+## 🔬 2. O que Investigamos e Tentamos Fazer
+
+### A. Investigação do JIT do Microcódigo VU1
+- **Hipótese:** O microcódigo dinâmico do VU1 deveria ser compilado em tempo de execução para WebAssembly via JIT (`vu_jit.cpp` e `vu_jit_web.cpp`), porém parecia estar falhando e caindo no interpretador por software (`run_fast`).
+- **Achado real:**
+  - Em `ps2-web-recomp/runtime/src/vu_jit.cpp`, o gerador binário de módulos WebAssembly declarava um descritor de memória com limites:
+    - Mínimo: 1 página (64 KB)
+    - Máximo: 65.536 páginas (4 GB)
+  - No entanto, o `CMakeLists.txt` e o Emscripten estavam configurados com `-sINITIAL_MEMORY=1073741824` (1 GB / 16.384 páginas) e `-sMAXIMUM_MEMORY=2147483648` (2 GB / 32.768 páginas) com `-pthread` (que usa `SharedArrayBuffer`).
+  - No padrão WebAssembly, quando um módulo dinâmico tenta importar uma `WebAssembly.Memory` compartilhada com limites de páginas incompatíveis, a engine rejeita a instanciação lançando um `LinkError: imported Memory with incompatible limits`.
+  - Como `ps2jit_instantiate` capturava a exceção silenciosamente em um bloco `try / catch` e retornava `0`, o JIT dinâmico falhava e o emulador caía permanentemente no interpretador lento por software.
+
+### B. Investigação das Funções Auxiliares Exportadas (`ps2jit_*`)
+- **Hipótese:** Durante a compilação com `-O3 -flto`, as funções auxiliares em C (`ps2jit_clip_value`, `ps2jit_mul`, `ps2jit_kick`, etc.) poderiam estar sendo removidas (dead code elimination) pelo linker do Emscripten.
+- **Ação:**
+  - Verificamos a presença dos símbolos no `ps2web.js`.
+  - Adicionamos a flag `-Wl,--export-dynamic` ao linker no `CMakeLists.txt` para garantir a preservação de todos os símbolos `EMSCRIPTEN_KEEPALIVE`.
+  - Confirmamos que todas as 23 rotinas vetoriais auxiliares estão acessíveis no runtime.
+
+### C. Investigação da Métrica "VU 100%" no HUD
+- **Hipótese:** O consumo de 100% poderia ser também um erro no cálculo de amostragem de tempo ocioso (*idle time*).
+- **Achado real:**
+  - A thread principal de emulação calculava o tempo decorrido usando `emscripten_get_now()` (milissegundos de alta precisão do navegador via `performance.now()`).
+  - Já a thread da VU (`run_vu_thread` em `runtime/src/system.cpp`) utilizava `std::chrono::steady_clock::now()`.
+  - No Emscripten com WebAssembly pthreads, `std::chrono::steady_clock` dentro de uma Worker pthread não possui a mesma base de sincronismo que `emscripten_get_now()`.
+  - Isso fazia com que `g_vu_idle_ms` acumulasse valores incorretos. Na fórmula do HUD:
+    $$\text{vuLoad} = 100 - \frac{\text{vuIdle} - \text{lastVuIdle}}{\text{span}} \times 100$$
+    O resultado da ociosidade era distorcido e a carga calculada resultava quase sempre em **100%**.
+
+---
+
+## ✅ 3. O que Deu Certo
+
+| Item | Alteração | Resultado |
+| :--- | :--- | :--- |
+| **Correção dos Limites de Memória no WASM JIT** | Alterado o teto de páginas em `vu_jit.cpp` de `65536` para `32768` (2 GB). | O módulo WebAssembly gerado pelo JIT agora respeita os limites da memória compartilhada (`SharedArrayBuffer`), eliminando o `LinkError`. |
+| **Resolução Resiliente de Símbolos JIT** | Atualizado `ps2jit_instantiate` em `vu_jit_web.cpp` para vincular dinamicamente as 23 funções exportadas (`wasmExports` e `Module`). | Instanciação do microcódigo vetorial agora conecta corretamente todas as funções matemáticas/vetoriais. |
+| **Preservação de Símbolos (`-Wl,--export-dynamic`)** | Adicionada flag ao target `ps2web` em `CMakeLists.txt`. | Nenhuma função auxiliar de cálculo de matrizes/vértices é descartada pelo LTO. |
+| **Sincronização de Relógio de Ociosidade** | Substituído `std::chrono::steady_clock` por `emscripten_get_now()` no bloco `#ifdef __EMSCRIPTEN__` de `runtime/src/system.cpp`. | O tempo ocioso da thread VU é medido com precisão milimétrica compatível com a thread principal. |
+| **Build e Deploy Automatizados** | Recompilação do `ps2web.wasm`/`ps2web.js` via Ninja e Vite, sincronização para `public/` e `dist/`, e deploy via Git. | O repositório remoto está totalmente sincronizado e atualizado. |
+
+---
+
+## ❌ 4. O que Deu Errado / Desafios Encontrados
+
+1. **Tentativa de Patchear Bytes de Memória em Runtime:**
+   - *Tentativa:* Tentar varrer o array binário do WASM via JavaScript em `ps2jit_instantiate` buscando a sequência `env.memory` para sobrescrever os bytes LEB128 em tempo de execução.
+   - *O que deu errado:* A substituição de bytes em runtime sem recalcular o tamanho dos LEB128 corrompia o cabeçalho das seções do módulo WASM (`expected 1 bytes, fell off end @+23`).
+   - *Solução adotada:* Corrigir a emissão diretamente no gerador C++ (`vu_jit.cpp`), gerando o binário WASM já estruturado e correto desde a origem.
+
+2. **Falta de Memória no Clang com Compilação Concorrente (`ninja` sem limitação):**
+   - *O que deu errado:* Ao rodar `ninja` com múltiplos workers paralelos, o Clang do Emscripten consumiu toda a RAM e gerou erro de out-of-memory (`LLVM ERROR: out of memory`) no arquivo denso `vu_jit.cpp`.
+   - *Solução adotada:* Executamos o build com `ninja -j 1`, garantindo compilação estável sem estourar a memória da máquina.
+
+---
+
+## 📊 5. Conclusão e Próximos Passos
+
+1. **Estado Atual:**
+   - O gerador de microcódigo JIT WebAssembly agora emite binários válidos e compatíveis com a memória compartilhada de 2 GB.
+   - O cálculo do tempo ocioso da thread VU foi calibrado para refletir o uso real da CPU.
+   - Os binários foram recompilados e enviados para o repositório oficial (`main`).
+
+2. **Como Testar:**
+   - Ao abrir o site, use **Ctrl + F5** (ou modo anônimo) para forçar o navegador a baixar o novo arquivo `ps2web.wasm` e `ps2web.js` sem utilizar o cache antigo do navegador.
