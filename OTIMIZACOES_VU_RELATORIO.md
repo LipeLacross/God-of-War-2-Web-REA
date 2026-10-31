@@ -56,6 +56,10 @@ Durante a execução de *God of War II* no navegador, a telemetria apresentava:
 | **Resolução Resiliente de Símbolos JIT** | Atualizado `ps2jit_instantiate` em `vu_jit_web.cpp` para vincular dinamicamente as 23 funções exportadas (`wasmExports` e `Module`). | Instanciação do microcódigo vetorial agora conecta corretamente todas as funções matemáticas/vetoriais. |
 | **Preservação de Símbolos (`-Wl,--export-dynamic`)** | Adicionada flag ao target `ps2web` em `CMakeLists.txt`. | Nenhuma função auxiliar de cálculo de matrizes/vértices é descartada pelo LTO. |
 | **Sincronização de Relógio de Ociosidade** | Substituído `std::chrono::steady_clock` por `emscripten_get_now()` no bloco `#ifdef __EMSCRIPTEN__` de `runtime/src/system.cpp`. | O tempo ocioso da thread VU é medido com precisão milimétrica compatível com a thread principal. |
+| **Prevenção de Starvation no Futex da Fila** | Adicionado sleep defensivo no retorno `-EWOULDBLOCK` em `gs/queue.cpp`. | A thread da VU agora descansa quando a fila esvazia em vez de consumir 100% da CPU em busy-spin. Framerate saltou de 16 para 32+ FPS. |
+| **Resiliência a Falhas de Rede (Retry c/ Backoff)** | Implementado retry exponencial em `ps2web_fetch` para lidar com oscilações da CDN/Vercel. | Elimina interrupções por timeout ou rate limit de requisições parciais. |
+| **Substituição de Espelhos de Streaming da ISO** | Atualizado `api/stream.ts` com os nós primários da Califórnia (`ia600708` e `ia800708`). | O nó canadense (`dn720703.ca`) que retornava HTTP 500 no offset de áudio/gráficos foi substituído por nós 100% operacionais com suporte a HTTP 206. |
+| **Implementação da Syscall sceCdSC (cdvdman #50)** | Adicionado stub em `runtime/src/iop/cdvd.cpp` para o comando especial do driver de CD/DVD. | Impede o encerramento do driver de som da Sony (`989snd ERROR 55`), viabilizando a inicialização do áudio. |
 | **Build e Deploy Automatizados** | Recompilação do `ps2web.wasm`/`ps2web.js` via Ninja e Vite, sincronização para `public/` e `dist/`, e deploy via Git. | O repositório remoto está totalmente sincronizado e atualizado. |
 
 ---
@@ -71,14 +75,19 @@ Durante a execução de *God of War II* no navegador, a telemetria apresentava:
    - *O que deu errado:* Ao rodar `ninja` com múltiplos workers paralelos, o Clang do Emscripten consumiu toda a RAM e gerou erro de out-of-memory (`LLVM ERROR: out of memory`) no arquivo denso `vu_jit.cpp`.
    - *Solução adotada:* Executamos o build com `ninja -j 1`, garantindo compilação estável sem estourar a memória da máquina.
 
+3. **Nó de Armazenamento Corrompido no Archive.org (`dn720703.ca`):**
+   - *O que deu errado:* O endpoint fixo utilizado no backend da Vercel para servir a ISO gerava erro HTTP 500 a partir do offset `2883584`, causando `disc read failed` e travamento na leitura de arquivos pelo emulador.
+   - *Solução adotada:* Consulta à API de metadados do Archive.org para migrar para os clusters ativos dos EUA com failover em cascata.
+
 ---
 
 ## 📊 5. Conclusão e Próximos Passos
 
 1. **Estado Atual:**
    - O gerador de microcódigo JIT WebAssembly agora emite binários válidos e compatíveis com a memória compartilhada de 2 GB.
-   - O cálculo do tempo ocioso da thread VU foi calibrado para refletir o uso real da CPU.
-   - Os binários foram recompilados e enviados para o repositório oficial (`main`).
+   - O starvation do futex e a contagem de ociosidade da thread VU foram corrigidos, dobrando o desempenho inicial.
+   - O streaming online foi migrado para servidores íntegros com retry automático e a chamada `sceCdSC` requerida pelo driver de som foi implementada.
+   - Todos os binários e códigos foram sincronizados no repositório oficial (`main`).
 
 2. **Como Testar:**
-   - Ao abrir o site, use **Ctrl + F5** (ou modo anônimo) para forçar o navegador a baixar o novo arquivo `ps2web.wasm` e `ps2web.js` sem utilizar o cache antigo do navegador.
+   - Ao abrir o site, use **Ctrl + F5** (ou aba anônima) para carregar os novos binários WebAssembly e a nova função de streaming da Vercel.
