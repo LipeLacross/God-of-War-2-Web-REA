@@ -97,7 +97,7 @@ export function App() {
               <Sparkles className="w-3.5 h-3.5 text-amber-400" /> WebGL 2.0 / WebGPU
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-950/60 border border-red-800 text-red-300">
-              <Trophy className="w-3.5 h-3.5 text-red-400" /> 60 FPS
+              <Trophy className="w-3.5 h-3.5 text-red-400" /> AOT Engine
             </span>
           </div>
         </div>

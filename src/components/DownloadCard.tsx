@@ -28,15 +28,15 @@ export const DownloadCard: React.FC<DownloadCardProps> = ({
         </span>
 
         <span className="inline-flex items-center gap-1 text-xs text-emerald-400 bg-emerald-950/70 border border-emerald-800/80 px-2.5 py-1 rounded-full">
-          <CheckCircle2 className="w-3.5 h-3.5" /> 60 FPS Sem Travamento
+          <CheckCircle2 className="w-3.5 h-3.5" /> WebAssembly + WebGPU
         </span>
       </div>
 
       <h3 className="text-xl font-bold text-neutral-100 mb-2 flex items-center gap-2">
-        ⚡ Recompilação Estática AOT para WebAssembly + WebGPU
+        ⚡ Recompilação Estática para WebAssembly + WebGPU
       </h3>
       <p className="text-sm text-neutral-400 mb-6 leading-relaxed">
-        Adeus ao emulador JIT lento e às falhas visuais! O código MIPS do Emotion Engine de <strong>God of War II</strong> foi recompilado estaticamente em C++ e WebAssembly com aceleração WebGPU em tempo real, rodando liso a 60 FPS com leitura de setores sob demanda.
+        O código MIPS do Emotion Engine de <strong>God of War II</strong> é executado diretamente em WebAssembly com aceleração WebGPU em tempo real e leitura de setores sob demanda.
       </p>
 
       {isDownloading ? (
@@ -59,7 +59,7 @@ export const DownloadCard: React.FC<DownloadCardProps> = ({
             className="flex-1 py-3.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-red-600 via-red-700 to-amber-700 hover:from-red-500 hover:to-amber-600 active:scale-95 shadow-lg shadow-red-950/50 border border-red-500/50 flex items-center justify-center gap-2 transition cursor-pointer"
           >
             <Play className="w-5 h-5 fill-white" />
-            JOGAR AGORA (MOTOR REA WEBGPU • 60 FPS)
+            JOGAR AGORA (MOTOR REA WEBGPU)
           </button>
 
           {isCached && (

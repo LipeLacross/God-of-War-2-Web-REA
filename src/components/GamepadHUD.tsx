@@ -21,7 +21,7 @@ export const GamepadHUD: React.FC<GamepadHUDProps> = ({ gamepad, onTestVibration
             </span>
             {gamepad.connected && (
               <span className="inline-flex items-center gap-1 text-xs text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800">
-                <CheckCircle className="w-3 h-3" /> 60 FPS Polling
+                <CheckCircle className="w-3 h-3" /> Baixa Latência
               </span>
             )}
           </div>

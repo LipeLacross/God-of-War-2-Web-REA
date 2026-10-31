@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Maximize2, Minimize2, ExternalLink, RotateCcw, Cpu, Sparkles } from 'lucide-react';
+import { Maximize2, Minimize2, ExternalLink, RotateCcw, Cpu } from 'lucide-react';
 import type { GameState } from '../types/game';
 
 interface GameCanvasProps {
@@ -40,11 +40,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse" />
           <span className="text-xs font-bold text-neutral-200 uppercase tracking-wider flex items-center gap-1.5">
             <Cpu className="w-3.5 h-3.5 text-red-400" />
-            REA WebGPU AOT Core
-          </span>
-          <span className="text-xs text-amber-300 font-mono font-bold flex items-center gap-1">
-            <Sparkles className="w-3 h-3" />
-            60 FPS Nativo
+            REA WebGPU Core
           </span>
         </div>
 
