@@ -60,6 +60,8 @@ Durante a execução de *God of War II* no navegador, a telemetria apresentava:
 | **Resiliência a Falhas de Rede (Retry c/ Backoff)** | Implementado retry exponencial em `ps2web_fetch` para lidar com oscilações da CDN/Vercel. | Elimina interrupções por timeout ou rate limit de requisições parciais. |
 | **Substituição de Espelhos de Streaming da ISO** | Atualizado `api/stream.ts` com os nós primários da Califórnia (`ia600708` e `ia800708`). | O nó canadense (`dn720703.ca`) que retornava HTTP 500 no offset de áudio/gráficos foi substituído por nós 100% operacionais com suporte a HTTP 206. |
 | **Implementação da Syscall sceCdSC (cdvdman #50)** | Adicionado stub em `runtime/src/iop/cdvd.cpp` para o comando especial do driver de CD/DVD. | Impede o encerramento do driver de som da Sony (`989snd ERROR 55`), viabilizando a inicialização do áudio. |
+| **Suporte a Streaming de Arquivos do IOP (`sceCdSt*`)** | Implementadas ordinais 56-61, 67, 68 e 77 de `cdvdman` em `runtime/src/iop/cdvd.cpp`. | Permite ao driver de som e dados (`SMPD.IRX` / `989NOMID.IRX`) fazer stream de arquivos contínuos (`wad/`, `sound/`, `dvd_streams/`). |
+| **Destino DMA do SIF RPC (`eedest` em `0x80000597`)** | Atualizado `runtime/src/iop/cdvdfsv.cpp` para gravar a struct `sceCdlFILE` tanto no buffer de argumentos quanto no ponteiro de destino no EE (`eedest`). | Permite à engine do God of War II receber o setor e nome corretos dos arquivos `GODOFWAR.TOC;1` e `PART1.PAK;1` no buffer real do jogo. |
 | **Build e Deploy Automatizados** | Recompilação do `ps2web.wasm`/`ps2web.js` via Ninja e Vite, sincronização para `public/` e `dist/`, e deploy via Git. | O repositório remoto está totalmente sincronizado e atualizado. |
 
 ---
@@ -79,6 +81,10 @@ Durante a execução de *God of War II* no navegador, a telemetria apresentava:
    - *O que deu errado:* O endpoint fixo utilizado no backend da Vercel para servir a ISO gerava erro HTTP 500 a partir do offset `2883584`, causando `disc read failed` e travamento na leitura de arquivos pelo emulador.
    - *Solução adotada:* Consulta à API de metadados do Archive.org para migrar para os clusters ativos dos EUA com failover em cascata.
 
+4. **Destino de Retorno em `sceCdSearchFile`:**
+   - *O que deu errado:* A chamada RPC `0x80000597` populava os campos apenas no buffer de envio (`args`), porém o `libcdvd.c` lê os resultados no ponteiro de destino no EE (`searchFileSendBuff.dest` / `eedest`). Se `eedest != args`, a struct no jogo ficava vazia, fazendo o boot travar em tela preta aguardando o TOC.
+   - *Solução adotada:* Gravamos a estrutura nos dois locais (`args` e `eedest`).
+
 ---
 
 ## 📊 5. Conclusão e Próximos Passos
@@ -87,6 +93,7 @@ Durante a execução de *God of War II* no navegador, a telemetria apresentava:
    - O gerador de microcódigo JIT WebAssembly agora emite binários válidos e compatíveis com a memória compartilhada de 2 GB.
    - O starvation do futex e a contagem de ociosidade da thread VU foram corrigidos, dobrando o desempenho inicial.
    - O streaming online foi migrado para servidores íntegros com retry automático e a chamada `sceCdSC` requerida pelo driver de som foi implementada.
+   - Os drivers de streaming de disco e o empacotamento SIF RPC agora entregam arquivos corretamente tanto para o IOP quanto para o EE.
    - Todos os binários e códigos foram sincronizados no repositório oficial (`main`).
 
 2. **Como Testar:**
