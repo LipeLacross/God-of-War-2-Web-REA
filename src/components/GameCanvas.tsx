@@ -11,10 +11,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Determina a URL do disco para o motor WebGPU
-  const discUrl = gameState.source === 'local' && gameState.romBlob
-    ? URL.createObjectURL(gameState.romBlob)
-    : '/disc.iso';
+  // Sempre usa /disc.iso — blob: URLs de outro contexto não são acessíveis dentro do iframe.
+  // Arquivos locais são servidos via API ou copiados para /disc.iso antes de iniciar.
+  const discUrl = '/disc.iso';
 
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
