@@ -7,7 +7,7 @@ interface GameCanvasProps {
   onReset: () => void;
 }
 
-export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) => {
+export const GameCanvas: React.FC<GameCanvasProps> = ({ onReset }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -73,11 +73,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, onReset }) =>
 
       {/* Frame de Execução do Motor WebGPU Recompilado */}
       <div className="relative w-full h-full flex items-center justify-center bg-black">
+        {/* credentialless permite que o iframe herde cross-origin isolation do pai (Chrome 96+) */}
         <iframe
           src={`/ps2web.html?disc=${encodeURIComponent(discUrl)}`}
           className="w-full h-full border-0 bg-black"
-          allow="cross-origin-isolated; autoplay; gamepad; fullscreen"
+          allow="autoplay; gamepad; fullscreen"
           title="God of War II WebGPU AOT Recomp"
+          // @ts-expect-error – atributo credentialless ainda não tipado no React, mas suportado no Chrome 96+
+          credentialless="true"
         />
       </div>
 
