@@ -112,3 +112,10 @@ Em 11/11/2026, as implantações na Vercel foram pausadas automaticamente devido
 2. **Alternativa Local / Cloudflare Pages:**
    * Testar localmente via servidor HTTP estático com suporte a `Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp` (ex.: `npx serve public` ou script Node local).
    * Migrar o front-end estático para **Cloudflare Pages**, que não possui limite restritivo de 10 GB de Origin Transfer no plano gratuito.
+
+### Ciclo de Faturamento e Restabelecimento (Vercel):
+* **Reset Automático:** O bloqueio da Vercel é zerado automaticamente no início do próximo ciclo de 30 dias da conta (visível no painel `Usage` da Vercel).
+* **Bloqueio Global do Time:** No plano Hobby, o estouro do limite de 10 GB de Origin Transfer pausa simultaneamente **todos os projetos** vinculados ao time.
+* **Medida Imediata de Proteção (Gatekeeper / Senha):**
+  * Para evitar novo esgotamento acidental de banda quando o serviço voltar ou for testado na web, foi implementado um controle de acesso via prompt/senha no cliente: **`lacrosstech`**.
+  * Sem a chave de acesso, o download/streaming do `disc.iso` via rede é bloqueado por padrão, permitindo apenas o carregamento de ISO local do usuário (`Select ISO / CHD`).
