@@ -63,6 +63,9 @@ Durante a execução de *God of War II* no navegador, a telemetria apresentava:
 | **Suporte a Streaming de Arquivos do IOP (`sceCdSt*`)** | Implementadas ordinais 56-61, 67, 68 e 77 de `cdvdman` em `runtime/src/iop/cdvd.cpp`. | Permite ao driver de som e dados (`SMPD.IRX` / `989NOMID.IRX`) fazer stream de arquivos contínuos (`wad/`, `sound/`, `dvd_streams/`). |
 | **Destino DMA do SIF RPC (`eedest` em `0x80000597`)** | Atualizado `runtime/src/iop/cdvdfsv.cpp` para gravar a struct `sceCdlFILE` tanto no buffer de argumentos quanto no ponteiro de destino no EE (`eedest`). | Permite à engine do God of War II receber o setor e nome corretos dos arquivos `GODOFWAR.TOC;1` e `PART1.PAK;1` no buffer real do jogo. |
 | **Build e Deploy Automatizados** | Recompilação do `ps2web.wasm`/`ps2web.js` via Ninja e Vite, sincronização para `public/` e `dist/`, e deploy via Git. | O repositório remoto está totalmente sincronizado e atualizado. |
+| **Otimização de Funções Vetoriais (`inline`)** | Marcadas as rotinas matemáticas pesadas (`fin`, `fout`, `norm`, `fast_upper`) em `vu_micro.cpp` como `inline`. | Redução expressiva de chamadas de função por vértice na thread da Vector Unit 1 (VU1). |
+| **Resampling Dinâmico no AudioWorklet** | Adicionada interpolação linear e taxa elástica de reprodução (`0.35x` a `1.04x`) no processador de áudio. | Elimina estalos e cortes abruptos (`Audio 0 ms`) quando o jogo oscila abaixo de 30 FPS. |
+| **Proteção de Banda / Gatekeeper por Senha** | Gating do download do `disc.iso` sob senha `lacrosstech` em `public/index.html`. | Impede consumo indevido da cota de 10 GB de Origin Transfer da Vercel por visitantes externos. |
 
 ---
 

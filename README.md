@@ -9,6 +9,8 @@ Aplicação web de alta performance construída em **React 19, TypeScript, Vite 
 
 ## 🔨 Funcionalidades do Projeto
 
+- 🔒 **Proteção de Banda & Gatekeeper por Senha:**
+  - Streaming da ISO sob proteção de senha (`lacrosstech`) ou carregamento local de arquivos `.iso` / `.chd` via botão nativo, protegendo a cota de tráfego de saída da infraestrutura CDN.
 - ⚡ **Execução Otimizada & Chunk Streaming:**
   - **Chunk Streaming Direto (HTTP 206):** Transmissão sob demanda de setores da ISO sem travar o jogo, garantindo boot rápido e execução fluida diretamente no navegador via WebAssembly e WebGPU.
 - 💾 **Persistência Dupla de Saves:**

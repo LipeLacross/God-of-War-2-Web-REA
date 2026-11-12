@@ -9,6 +9,8 @@ A high-performance web application built with **React 19, TypeScript, Vite, and 
 
 ## 🔨 Project Features
 
+- 🔒 **Bandwidth Guard & Password Gatekeeper:**
+  - Online ISO streaming gated by access key (`lacrosstech`) or local ISO/CHD loading to preserve CDN transfer quotas.
 - ⚡ **Optimized Execution & Chunk Streaming:**
   - **Direct Chunk Streaming (HTTP 206):** On-demand ISO sector streaming without freezing, enabling fast boot and smooth gameplay directly in the browser via WebAssembly and WebGPU.
 - 💾 **Dual Save Persistence:**
