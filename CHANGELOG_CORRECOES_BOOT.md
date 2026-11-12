@@ -91,3 +91,24 @@ Adição de logs de diagnóstico para rastreio em tempo real de semáforos e DMA
    - Commit no repositório principal:
      `fix(web): update wasm runtime with DMAC handler argument fix`
    - Executado `git push origin main` com sucesso, acionando o pipeline automático na Vercel.
+
+---
+
+## ⚠️ 5. Incidente de Infraestrutura / Hosting (Vercel) – 11/11/2026
+
+### Alerta: Esgotamento de Limite de Tráfego (Hobby Tier)
+Em 11/11/2026, as implantações na Vercel foram pausadas automaticamente devido ao estouro de cota de dados:
+* **Fast Origin Transfer:** **30.14 GB / 10 GB** (300% do limite gratuito excedido).
+* **Fast Data Transfer:** **45.85 GB / 100 GB**.
+* **CDN Requests:** **228K / 1M**.
+* **Status:** `Deployments Paused - Your team exceeded the Hobby fair use limits. Upgrade to Pro to resume service.`
+
+### Causa Raiz:
+* O arquivo `disc.iso` / imagem do God of War 2 possui múltiplos gigabytes (~4 GB a 8 GB) e os binários WASM (`ps2web.wasm` tem ~16 MB).
+* Ao realizar múltiplos testes com streaming contínuo de setores da ISO diretamente da origem Vercel via HTTP Range Requests (`ps2web_fetch`), o limite de 10 GB de Origin Transfer do plano gratuito foi consumido rapidamente.
+
+### Ações Recomendadas:
+1. **Desacoplar a ISO do host Vercel:** Hospedar o arquivo `.iso` / `.chd` em um bucket com tráfego gratuito/barato de saída (Cloudflare R2, Backblaze B2, ou servidor CDN próprio) e apontar via query param (`?disc=https://...`).
+2. **Alternativa Local / Cloudflare Pages:**
+   * Testar localmente via servidor HTTP estático com suporte a `Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp` (ex.: `npx serve public` ou script Node local).
+   * Migrar o front-end estático para **Cloudflare Pages**, que não possui limite restritivo de 10 GB de Origin Transfer no plano gratuito.
